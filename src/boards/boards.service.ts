@@ -11,8 +11,12 @@ export class BoardsService {
     return this.boards;
   }
 
-  getBoardById(id: string): Board | null {
-    return this.boards.find((board) => board.id === id) ?? null;
+  getBoardById(id: string): Board {
+    const board = this.boards.find((board) => board.id === id);
+    if (!board) {
+      throw new NotFoundException(`해당 ${id}의 게시글을 찾을 수 없습니다.`);
+    }
+    return board;
   }
 
   createBoard(createBoardDto: CreateBoardDto): Board {
@@ -28,13 +32,14 @@ export class BoardsService {
   }
 
   deleteBoard(id: string): void {
-    this.boards = this.boards.filter((board) => board.id !== id);
+    const found = this.getBoardById(id); // 에러 처리를 getBoardById에서 해주기 땜에 여기서 할 필요가 없음
+    this.boards = this.boards.filter((board) => board.id !== found.id);
   }
 
   updateBoardStatus(id: string, status: BoardStatus): Board {
     const board = this.getBoardById(id);
     if (!board) {
-      throw new NotFoundException('Board not found');
+      throw new NotFoundException('해당 게시글을 찾을 수 없습니다.');
     }
     board.status = status;
     return board;
